@@ -10,6 +10,20 @@ const CONFIG = {
   storeName:      "Mimitos"
 };
 
+let CATALOG = {};
+
+async function loadCatalog() {
+  const res = await fetch("data/catalogo_productos.json");
+
+  if (!res.ok) {
+    throw new Error("No se pudo cargar el catálogo");
+  }
+
+  const data = await res.json();
+  console.log("✅ Catalog cargado:", data);
+  return data;
+}
+
 /* ══════════════════════════════════════════
    ESTADO (persiste en sessionStorage mientras
    el usuario esté en la pestaña abierta)
@@ -498,47 +512,24 @@ function sendWhatsApp() {
   const url  = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
   window.open(url, "_blank");
 }
-// function sendWhatsApp() {
-//   if (cart.length === 0) return;
-
-//   const typeLabel = priceType === "retail" ? "Detal" : "Mayorista";
-//   const total     = cart.reduce((s, i) => s + i[priceType] * i.qty, 0);
-//   const orden     = orderNumber();
-
-//   let lines = [];
-//   lines.push(`🛍️ *PEDIDO ${CONFIG.storeName}*`);
-//   lines.push(`📋 N° de orden: *${orden}*`);
-//   lines.push(`💰 Tipo de precio: *${typeLabel}*`);
-//   lines.push("─────────────────────");
-
-//   cart.forEach((item, i) => {
-//     const price    = item[priceType];
-//     const subtotal = price * item.qty;
-//     const cat      = CAT_META[item.cat]?.label || item.cat;
-//     lines.push(
-//       `${i+1}. *${item.name}*\n` +
-//       `   Categoría: ${cat}\n` +
-//       `   Cantidad: ${item.qty} × ${formatCOP(price)} = *${formatCOP(subtotal)}*`
-//     );
-//   });
-
-//   lines.push("─────────────────────");
-//   lines.push(`💵 *TOTAL: ${formatCOP(total)}*`);
-//   lines.push("");
-//   lines.push("Por favor confirmar disponibilidad y forma de pago. ¡Gracias! 🌸");
-
-//   const text = lines.join("\n");
-//   const url  = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
-//   window.open(url, "_blank");
-// }
-
 /* ══════════════════════════════════════════
    INIT
    ══════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
-  initStock();
-  renderCatalog();
-  updateCartUI();
+document.addEventListener("DOMContentLoaded", async () => {
+
+  try {
+    CATALOG = await loadCatalog(); // 🔥 CARGA JSON
+
+    initStock();
+    renderCatalog();
+    updateCartUI();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error cargando el catálogo");
+    return;
+  }
+
   $("price-type-select").value = priceType;
 
   // header cart
@@ -546,18 +537,31 @@ document.addEventListener("DOMContentLoaded", () => {
   $("close-cart").addEventListener("click", closeCart);
   $("cart-overlay").addEventListener("click", closeCart);
   $("btn-whatsapp").addEventListener("click", sendWhatsApp);
-  $("btn-clear").addEventListener("click", () => { if(cart.length > 0) clearCart(); });
-  $("price-type-select").addEventListener("change", e => { priceType = e.target.value; updateCartUI(); });
+  $("btn-clear").addEventListener("click", () => { 
+    if(cart.length > 0) clearCart(); 
+  });
+
+  $("price-type-select").addEventListener("change", e => { 
+    priceType = e.target.value; 
+    updateCartUI(); 
+  });
 
   // modal
-  $("modal-overlay").addEventListener("click", e => { if(e.target === $("modal-overlay")) closeModal(); });
+  $("modal-overlay").addEventListener("click", e => { 
+    if(e.target === $("modal-overlay")) closeModal(); 
+  });
+
   $("modal-x").addEventListener("click", closeModal);
   $("modal-close-btn").addEventListener("click", closeModal);
   $("modal-btn-add").addEventListener("click", modalAddToCart);
   $("modal-qty-minus").addEventListener("click", () => modalQtyChange(-1));
-  $("modal-qty-plus").addEventListener("click",  () => modalQtyChange(1));
+  $("modal-qty-plus").addEventListener("click", () => modalQtyChange(1));
 
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { closeModal(); closeCart(); }
+    if (e.key === "Escape") { 
+      closeModal(); 
+      closeCart(); 
+    }
   });
+
 });

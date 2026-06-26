@@ -307,17 +307,27 @@ function updateCartUI() {
   const container = $("cart-items");
 
   if (cart.length === 0) {
-    container.innerHTML = `<div class="cart-empty"><div class="big">🛒</div><span>Tu carrito está vacío</span></div>`;
+    container.innerHTML = `
+      <div class="cart-empty">
+        <div class="big">🛒</div>
+        <span>Tu carrito está vacío</span>
+      </div>
+    `;
+
+    updateWholesaleMessage(); // ✅ CLAVE
     return;
   }
 
   container.innerHTML = "";
+
   cart.forEach(item => {
     const price    = item[priceType];
     const avail    = stockSession[item.key] ?? 0;
     const catMeta  = CAT_META[item.cat] || {};
+
     const row = document.createElement("div");
     row.className = "cart-item";
+
     row.innerHTML = `
       <img src="${item.img}" alt="${item.name}" onerror="this.src='${fallbackSrc()}'"/>
       <div class="cart-item-info">
@@ -327,12 +337,46 @@ function updateCartUI() {
         <div class="cart-item-qty">
           <button class="qty-btn" onclick="changeQtyInCart('${item.key}',-1)" ${item.qty<=1?'disabled':''}>−</button>
           <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQtyInCart('${item.key}',1)" ${avail<=0?'disabled':''} title="${avail<=0?'Sin más stock':'Agregar uno más'}">+</button>
+          <button class="qty-btn" onclick="changeQtyInCart('${item.key}',1)" ${avail<=0?'disabled':''}>+</button>
         </div>
       </div>
-      <button class="remove-item" title="Quitar" onclick="removeFromCart('${item.key}')">✕</button>`;
+      <button class="remove-item" onclick="removeFromCart('${item.key}')">✕</button>
+    `;
+
     container.appendChild(row);
   });
+
+  // ✅ SOLO UNA VEZ AL FINAL
+  updateWholesaleMessage();
+}
+
+function updateWholesaleMessage() {
+  const el = $("wholesale-msg");
+  if (!el) return;
+
+  const total = cart.reduce((s, i) => s + i[priceType] * i.qty, 0);
+
+  if (priceType !== "wholesale") {
+    el.textContent = "Estás comprando en precio detal";
+    el.className = "wholesale-msg";
+    return;
+  }
+
+  // ✅ NUEVO: carrito vacío
+  if (cart.length === 0) {
+    el.textContent = "Agrega productos para acceder al precio mayorista";
+    el.className = "wholesale-msg";
+    return;
+  }
+
+  if (total >= WHOLESALE_MIN) {
+    el.textContent = "🎉 ¡Felicidades! Puedes acceder al súper descuento de nuestra tienda";
+    el.className = "wholesale-msg ok";
+  } else {
+    const faltante = WHOLESALE_MIN - total;
+    el.textContent = `⚠️ Te faltan ${formatCOP(faltante)} para acceder al precio mayorista`;
+    el.className = "wholesale-msg warn";
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -364,7 +408,7 @@ function openModal(cat, idx) {
   document.getElementById("modal-name").textContent = p.name;
 
   // precios
-  document.getElementById("modal-price-normal").textContent    = formatCOP(p.retail);
+  // document.getElementById("modal-price-normal").textContent    = formatCOP(p.retail);
   document.getElementById("modal-price-detal").textContent     = formatCOP(p.retail);
   document.getElementById("modal-price-wholesale").textContent = formatCOP(p.wholesale);
 

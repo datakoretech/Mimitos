@@ -6,7 +6,7 @@
    CONFIGURACIÓN
    ══════════════════════════════════════════ */
 const CONFIG = {
-  whatsappNumber: "573152248880",   // número destino
+  whatsappNumber: "573174706489",   // número destino
   storeName:      "Mimitos"
 };
 
@@ -517,45 +517,49 @@ function sendWhatsApp() {
 
   const total = cart.reduce((s, i) => s + i[priceType] * i.qty, 0);
 
-  // 🔥 validación SOLO para mayorista
+  // validar mínimo mayorista
   if (priceType === "wholesale" && total < WHOLESALE_MIN) {
     const faltante = WHOLESALE_MIN - total;
-    showToast(`😕 Te faltan ${formatCOP(faltante)} para acceder a precio mayorista`);
-    // showToast("😕 Lo siento, aún no has superado el tope mínimo para compras al por mayor");
+    showToast(`😕 Te faltan ${formatCOP(faltante)} para precio mayorista`);
     return;
   }
 
-  // ✅ si pasa validación → continuar normal
+  const orden = orderNumber();
   const typeLabel = priceType === "retail" ? "Detal" : "Mayorista";
-  const orden     = orderNumber();
 
-  let lines = [];
-  lines.push(`🛍️ *PEDIDO ${CONFIG.storeName}*`);
-  lines.push(`📋 N° de orden: *${orden}*`);
-  lines.push(`💰 Tipo de precio: *${typeLabel}*`);
-  lines.push("─────────────────────");
+  const baseUrl = window.location.origin + window.location.pathname;
+  const orderUrl = `${baseUrl}?order=${orden}`;
+
+  const lines = [
+    `🛍️ *PEDIDO ${CONFIG.storeName}*`,
+    `📋 Orden: *${orden}*`,
+    `💰 Tipo: *${typeLabel}*`,
+    "─────────────────────"
+  ];
 
   cart.forEach((item, i) => {
     const price    = item[priceType];
     const subtotal = price * item.qty;
-    const cat      = CAT_META[item.cat]?.label || item.cat;
 
     lines.push(
-      `${i+1}. *${item.name}*\n` +
-      `   Categoría: ${cat}\n` +
-      `   Cantidad: ${item.qty} × ${formatCOP(price)} = *${formatCOP(subtotal)}*`
+      `${i + 1}. *${item.name}*\n` +
+      `   ${item.qty} × ${formatCOP(price)} = *${formatCOP(subtotal)}*`
     );
   });
 
-  lines.push("─────────────────────");
-  lines.push(`💵 *TOTAL: ${formatCOP(total)}*`);
-  lines.push("");
-  lines.push("Por favor confirmar disponibilidad y forma de pago. ¡Gracias! 🌸");
+  lines.push(
+    "─────────────────────",
+    `💵 *TOTAL: ${formatCOP(total)}*`,
+    "",
+    "Gracias por tu pedido 🌸"
+  );
 
   const text = lines.join("\n");
-  const url  = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
+  const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
+
   window.open(url, "_blank");
 }
+
 /* ══════════════════════════════════════════
    INIT
    ══════════════════════════════════════════ */
@@ -607,5 +611,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       closeCart(); 
     }
   });
-
 });

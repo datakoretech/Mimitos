@@ -30,32 +30,33 @@ html {
 }
 
 /* ── HEADER ──────────────────────────────────── */
+
 .logo-floating {
   position: fixed;
-  top: 10px;
-  left: 8px;
+  top: 2px;
+  left: -25px;
   z-index: 300;
-  background: rgba(255,255,255,0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 
-  padding: 8px 16px;
+  /* ❌ quitamos fondo */
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
 
-  /* 🔥 bordes personalizados */
-  border-radius: 
-    30px 20px 40px 20px; /* TL TR BR BL */
+  padding: 0;
 
-  /* 🔥 sombra más marcada hacia abajo-derecha */
-  box-shadow:
-    12px 10px 30px rgba(0,0,0,0.18),
-    4px 4px 10px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   animation: floatBreath 3.5s ease-in-out infinite;
 }
 
 .logo-floating img {
-  height: 80px; /* 🔥 aquí lo haces grande */
+  height: 90px; /* 🔥 controla aquí el tamaño */
   display: block;
+
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18)); /* 🔥 sombra realista */
+  transform: translateY(-12px); /* 🔥 AQUÍ subes el logo */
 }
 
 @keyframes floatBreath {
@@ -70,11 +71,10 @@ html {
   }
 }
 
-
 header {
   background:var(--white); 
   border-bottom:2px solid var(--pink-light);
-  padding: 5px 15px;
+  padding: 10px 15px;
   padding-left: 140px;  /* 🔥 AÑADIDO */
   
   display:flex; 

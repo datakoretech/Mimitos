@@ -1,0 +1,19 @@
+:root { --pink:#F2A0AE; --pink-dark:#E07D8F; --pink-light:#FAD4DB; --pink-pale:#FFF0F3; --brown:#4A3728; --brown-mid:#7A5C4E; --cream:#FFF8F9; --white:#fff; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; background:linear-gradient(145deg, var(--pink-pale), var(--cream)); color:var(--brown); font-family:'Quicksand',sans-serif; }
+.order-page { max-width:760px; margin:0 auto; padding:28px 18px 48px; }
+.order-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; color:var(--brown-mid); font-size:.85rem; font-weight:700; }
+.brand img { display:block; width:92px; max-height:60px; object-fit:contain; }
+.order-card { background:var(--white); border:1px solid var(--pink-light); border-radius:22px; box-shadow:0 10px 34px rgba(122,92,78,.13); overflow:hidden; }
+.order-title { padding:25px 25px 17px; border-bottom:1px solid var(--pink-light); }
+.eyebrow { color:var(--pink-dark); font-size:.73rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+h1, h2, strong { font-family:'Nunito',sans-serif; } h1 { margin:4px 0; font-size:1.7rem; } .order-title p { margin:0; color:var(--brown-mid); font-size:.86rem; font-weight:700; }
+.order-meta { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:13px 25px; background:var(--pink-pale); color:var(--brown-mid); font-size:.78rem; font-weight:700; }
+.order-items { padding:12px 25px; }
+.order-item { display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--pink-light); }
+.order-item:last-child { border-bottom:0; } .order-item img { width:74px; height:74px; object-fit:contain; padding:5px; background:var(--pink-pale); border-radius:11px; flex-shrink:0; }
+.order-item h2 { margin:1px 0 4px; font-size:1rem; line-height:1.3; } .order-item p { margin:0; }
+.item-price { color:var(--pink-dark); font-family:'Nunito',sans-serif; font-weight:900; font-size:.9rem; }.item-comment { margin-top:7px!important; color:var(--brown-mid); font-size:.8rem; line-height:1.45; }
+.order-total { display:flex; justify-content:space-between; align-items:center; padding:17px 25px; background:var(--pink-pale); color:var(--brown); }.order-total strong { color:var(--pink-dark); font-size:1.35rem; }.order-note { margin:0; padding:15px 25px 22px; color:var(--brown-mid); font-size:.77rem; text-align:center; }
+.order-error { padding:35px 25px; text-align:center; }.order-error h1 { font-size:1.35rem; }.order-error p { color:var(--brown-mid); line-height:1.55; }.order-error a { display:inline-block; margin-top:16px; color:var(--pink-dark); font-weight:900; }
+@media (max-width:480px) { .order-page { padding:18px 12px 32px; } .order-title, .order-meta, .order-items, .order-total, .order-note { padding-left:17px; padding-right:17px; } .order-item img { width:62px; height:62px; } }

@@ -103,9 +103,12 @@ function stockLabel(n) {
 }
 
 function orderNumber() {
-  // simple: fecha + random
+  // Fecha + identificador criptográficamente aleatorio: evita colisiones entre pedidos.
   const d = new Date();
-  return `MIM-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*9000+1000)}`;
+  const randomId = window.crypto?.randomUUID
+    ? window.crypto.randomUUID().replace(/-/g, "").slice(0, 10).toUpperCase()
+    : Math.random().toString(36).slice(2, 12).toUpperCase();
+  return `MIM-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${randomId}`;
 }
 
 /* ══════════════════════════════════════════
@@ -569,7 +572,32 @@ function filterCategory(cat, btn) {
    ══════════════════════════════════════════ */
 const WHOLESALE_MIN = 150000;
 
-function sendWhatsApp() {
+async function encodeOrderPayload(order) {
+  let bytes = new TextEncoder().encode(JSON.stringify(order));
+
+  // Comprimir hace el enlace mucho más corto y mejora su detección en WhatsApp.
+  if ("CompressionStream" in window) {
+    const compressed = new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"));
+    bytes = new Uint8Array(await new Response(compressed).arrayBuffer());
+  }
+
+  let binary = "";
+  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+  const encoded = btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return `${"CompressionStream" in window ? "gz" : "raw"}.${encoded}`;
+}
+
+async function buildOrderUrl(order) {
+  const orderPage = new URL("pedido.html", window.location.href);
+  // El fragmento (#) no se envía al servidor: GitHub Pages puede servir esta página estática.
+  orderPage.hash = `p/${await encodeOrderPayload(order)}`;
+  return orderPage.toString();
+}
+
+async function sendWhatsApp() {
   if (cart.length === 0) return;
 
   const total = cart.reduce((s, i) => s + i[priceType] * i.qty, 0);
@@ -582,36 +610,49 @@ function sendWhatsApp() {
   }
 
   const orden = orderNumber();
+  const order = {
+    version: 1,
+    orderNumber: orden,
+    createdAt: new Date().toISOString(),
+    storeName: CONFIG.storeName,
+    priceType,
+    total,
+    items: cart.map(item => ({
+      name: item.name,
+      img: item.img,
+      qty: item.qty,
+      price: item[priceType],
+      comment: item.comment?.trim() || ""
+    }))
+  };
+  const orderUrl = await buildOrderUrl(order);
   const typeLabel = priceType === "retail" ? "Detal" : "Mayorista";
 
-  const baseUrl = window.location.origin + window.location.pathname;
-  const orderUrl = `${baseUrl}?order=${orden}`;
-
   const lines = [
-    `🛍️ *PEDIDO ${CONFIG.storeName}*`,
-    `📋 Orden: *${orden}*`,
-    `💰 Tipo: *${typeLabel}*`,
-    "─────────────────────"
+    `*PEDIDO ${CONFIG.storeName}*`,
+    `Orden: *${orden}*`,
+    `Tipo: *${typeLabel}*`,
+    "---------------------"
   ];
 
-  cart.forEach((item, i) => {
-    const price    = item[priceType];
+  cart.forEach((item, index) => {
+    const price = item[priceType];
     const subtotal = price * item.qty;
-
     lines.push(
-      `${i + 1}. *${item.name}*\n` +
-      `   ${item.qty} × ${formatCOP(price)} = *${formatCOP(subtotal)}*`
+      `${index + 1}. *${item.name}*`,
+      `   ${item.qty} x ${formatCOP(price)} = *${formatCOP(subtotal)}*`
     );
     if (item.comment?.trim()) {
-      lines.push(`   📝 Comentario: ${item.comment.trim()}`);
+      lines.push(`   Comentario: ${item.comment.trim()}`);
     }
   });
 
   lines.push(
-    "─────────────────────",
-    `💵 *TOTAL: ${formatCOP(total)}*`,
+    "---------------------",
+    `*TOTAL: ${formatCOP(total)}*`,
     "",
-    "Gracias por tu pedido 🌸"
+    "Ver pedido:",
+    orderUrl
   );
 
   const text = lines.join("\n");

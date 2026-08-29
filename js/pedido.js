@@ -13,7 +13,13 @@
   }
 
   async function decodeOrder() {
-    const value = window.location.hash.startsWith("#p/") ? window.location.hash.slice(3) : "";
+    let value = "";
+    if (window.location.hash.startsWith("#p/")) {
+      value = window.location.hash.slice(3);
+    } else if (window.location.hash.startsWith("#pedido=")) {
+      // Compatibilidad con los enlaces creados antes de la compresión.
+      value = `raw.${decodeURIComponent(window.location.hash.slice(8))}`;
+    }
     if (!value) throw new Error("missing-order");
     const [format, encoded] = value.split(".", 2);
     if (!encoded || !["gz", "raw"].includes(format)) throw new Error("invalid-order");

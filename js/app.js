@@ -571,6 +571,7 @@ function filterCategory(cat, btn) {
    WHATSAPP
    ══════════════════════════════════════════ */
 const WHOLESALE_MIN = 150000;
+const ORDER_PAGE_VERSION = "3";
 
 async function encodeOrderPayload(order) {
   let bytes = new TextEncoder().encode(JSON.stringify(order));
@@ -592,6 +593,8 @@ async function encodeOrderPayload(order) {
 
 async function buildOrderUrl(order) {
   const orderPage = new URL("pedido.html", window.location.href);
+  // Fuerza la carga de la versión que sabe interpretar los enlaces comprimidos.
+  orderPage.searchParams.set("v", ORDER_PAGE_VERSION);
   // El fragmento (#) no se envía al servidor: GitHub Pages puede servir esta página estática.
   orderPage.hash = `p/${await encodeOrderPayload(order)}`;
   return orderPage.toString();

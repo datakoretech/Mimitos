@@ -571,24 +571,10 @@ function filterCategory(cat, btn) {
    WHATSAPP
    ══════════════════════════════════════════ */
 const WHOLESALE_MIN = 150000;
-const ORDER_PAGE_VERSION = "3";
+const ORDER_PAGE_VERSION = "4";
 
-async function encodeOrderPayload(order) {
-  let bytes = new TextEncoder().encode(JSON.stringify(order));
-
-  // Comprimir hace el enlace mucho más corto y mejora su detección en WhatsApp.
-  if ("CompressionStream" in window) {
-    const compressed = new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"));
-    bytes = new Uint8Array(await new Response(compressed).arrayBuffer());
-  }
-
-  let binary = "";
-  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
-  const encoded = btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-  return `${"CompressionStream" in window ? "gz" : "raw"}.${encoded}`;
+function encodeOrderPayload(order) {
+  return `lz.${OrderCodec.compress(JSON.stringify(order))}`;
 }
 
 async function buildOrderUrl(order) {
@@ -596,7 +582,7 @@ async function buildOrderUrl(order) {
   // Fuerza la carga de la versión que sabe interpretar los enlaces comprimidos.
   orderPage.searchParams.set("v", ORDER_PAGE_VERSION);
   // El fragmento (#) no se envía al servidor: GitHub Pages puede servir esta página estática.
-  orderPage.hash = `p/${await encodeOrderPayload(order)}`;
+  orderPage.hash = `p/${encodeOrderPayload(order)}`;
   return orderPage.toString();
 }
 

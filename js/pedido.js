@@ -22,7 +22,14 @@
     }
     if (!value) throw new Error("missing-order");
     const [format, encoded] = value.split(".", 2);
-    if (!encoded || !["gz", "raw"].includes(format)) throw new Error("invalid-order");
+    if (!encoded || !["lz", "gz", "raw"].includes(format)) throw new Error("invalid-order");
+    if (format === "lz") {
+      const data = JSON.parse(OrderCodec.decompress(encoded));
+      if (data.version !== 1 || !data.orderNumber || !Array.isArray(data.items) || !data.items.length) {
+        throw new Error("invalid-order");
+      }
+      return data;
+    }
     const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - encoded.length % 4) % 4);
     let bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
     if (format === "gz") {

@@ -1,7 +1,7 @@
 {
   "llaveros": [
     {
-      "img": "img/llaveros/k1.png",
+      "img": "img/llaveros/k1.png;img/llaveros/k1_2.png;img/llaveros/k1_3.png",
       "name": "Llavero K1 — Corazón Brillante",
       "retail": 5000,
       "wholesale": 3500,

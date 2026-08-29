@@ -55,7 +55,13 @@ function saveCart() {
 function loadCart() {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const savedCart = raw ? JSON.parse(raw) : [];
+    // Compatibilidad con carritos creados antes de admitir varias imágenes.
+    return Array.isArray(savedCart) ? savedCart.map(item => ({
+      ...item,
+      img: String(item.img || "").split(";")[0].trim(),
+      comment: item.comment || ""
+    })) : [];
   } catch(e) { return []; }
 }
 
@@ -119,6 +125,18 @@ function fallbackSrc() {
   );
 }
 
+// El catálogo permite varias imágenes en una sola celda, separadas por punto y coma.
+function productImages(product) {
+  return String(product.img || "")
+    .split(";")
+    .map(path => path.trim())
+    .filter(Boolean);
+}
+
+function primaryImage(product) {
+  return productImages(product)[0] || fallbackSrc();
+}
+
 function renderCatalog() {
   Object.entries(CATALOG).forEach(([cat, products]) => {
     const grid = $("grid-" + cat);
@@ -144,7 +162,7 @@ function renderCatalog() {
       card.dataset.key = key;
       card.innerHTML = `
         <div class="card-img-wrap" onclick="openModal('${cat}',${idx})" title="Ver detalle">
-          <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.src='${fallbackSrc()}'"/>
+          <img src="${primaryImage(p)}" alt="${p.name}" loading="lazy" onerror="this.src='${fallbackSrc()}'"/>
           ${p.tag ? `<span class="tag">${p.tag}</span>` : ""}
           <div class="zoom-hint"><span>🔍</span></div>
         </div>
@@ -198,8 +216,8 @@ function addToCart(cat, idx, qty = 1) {
   if (existing) {
     existing.qty += toAdd;
   } else {
-    cart.push({ key, cat, idx, name:product.name, img:product.img,
-                retail:product.retail, wholesale:product.wholesale, qty:toAdd });
+    cart.push({ key, cat, idx, name:product.name, img:primaryImage(product),
+                retail:product.retail, wholesale:product.wholesale, qty:toAdd, comment:"" });
   }
 
   stockSession[key] = avail - toAdd;
@@ -239,6 +257,13 @@ function changeQtyInCart(key, delta) {
   saveCart();
   updateCartUI();
   refreshStockEl(key);
+}
+
+function updateCartComment(key, comment) {
+  const item = cart.find(i => i.key === key);
+  if (!item) return;
+  item.comment = comment;
+  saveCart();
 }
 
 
@@ -329,7 +354,7 @@ function updateCartUI() {
     row.className = "cart-item";
 
     row.innerHTML = `
-      <img src="${item.img}" alt="${item.name}" onerror="this.src='${fallbackSrc()}'"/>
+      <img src="${item.img || fallbackSrc()}" alt="${item.name}" onerror="this.src='${fallbackSrc()}'"/>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
         <div class="cart-item-cat">${catMeta.icon || ""} ${catMeta.label || item.cat}</div>
@@ -339,9 +364,17 @@ function updateCartUI() {
           <span class="qty-num">${item.qty}</span>
           <button class="qty-btn" onclick="changeQtyInCart('${item.key}',1)" ${avail<=0?'disabled':''}>+</button>
         </div>
+        <label class="cart-item-comment-label">
+          Comentario / modelo
+          <textarea class="cart-item-comment" rows="2" maxlength="300" placeholder="Ej.: modelo, color o detalle que deseas"></textarea>
+        </label>
       </div>
       <button class="remove-item" onclick="removeFromCart('${item.key}')">✕</button>
     `;
+
+    const commentField = row.querySelector(".cart-item-comment");
+    commentField.value = item.comment || "";
+    commentField.addEventListener("input", event => updateCartComment(item.key, event.target.value));
 
     container.appendChild(row);
   });
@@ -385,6 +418,32 @@ function updateWholesaleMessage() {
 let modalCurrentKey = null;
 let modalQty = 1;
 
+function showModalImage(images, activeIndex, productName) {
+  const mImg = document.querySelector("#product-modal .modal-img > img");
+  mImg.src = images[activeIndex] || fallbackSrc();
+  mImg.alt = `${productName}${images.length > 1 ? ` — imagen ${activeIndex + 1}` : ""}`;
+  mImg.onerror = () => { mImg.src = fallbackSrc(); };
+
+  const gallery = $("modal-gallery");
+  gallery.replaceChildren();
+  gallery.hidden = images.length < 2;
+
+  images.forEach((src, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `modal-gallery-thumb${index === activeIndex ? " active" : ""}`;
+    button.setAttribute("aria-label", `Ver imagen ${index + 1} de ${productName}`);
+    button.setAttribute("aria-pressed", String(index === activeIndex));
+    const thumbnail = document.createElement("img");
+    thumbnail.src = src;
+    thumbnail.alt = "";
+    thumbnail.onerror = () => { thumbnail.src = fallbackSrc(); };
+    button.appendChild(thumbnail);
+    button.addEventListener("click", () => showModalImage(images, index, productName));
+    gallery.appendChild(button);
+  });
+}
+
 function openModal(cat, idx) {
   const p      = CATALOG[cat][idx];
   const key    = `${cat}-${idx}`;
@@ -395,9 +454,7 @@ function openModal(cat, idx) {
   modalQty = 1;
 
   // imagen
-  const mImg = document.querySelector("#product-modal .modal-img img");
-  mImg.src = p.img;
-  mImg.onerror = () => { mImg.src = fallbackSrc(); };
+  showModalImage(productImages(p), 0, p.name);
 
   // tag
   const tagEl = document.querySelector("#product-modal .modal-tag");
@@ -545,6 +602,9 @@ function sendWhatsApp() {
       `${i + 1}. *${item.name}*\n` +
       `   ${item.qty} × ${formatCOP(price)} = *${formatCOP(subtotal)}*`
     );
+    if (item.comment?.trim()) {
+      lines.push(`   📝 Comentario: ${item.comment.trim()}`);
+    }
   });
 
   lines.push(

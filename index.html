@@ -56,19 +56,16 @@
 <div class="category-bar" id="category-bar">
   <button class="category-scroll-control previous" type="button" aria-label="Ver categorías anteriores" onclick="scrollCategoryBar(-1)">‹</button>
   <div class="category-scroll" id="category-scroll" aria-label="Categorías de productos">
-    <button class="category-pill fallback active" type="button" aria-label="Ver todos los productos" title="Todo" onclick="filterCategory('all', this)"><span class="category-pill-label">Todo</span></button>
-    <button class="category-pill" type="button" aria-label="Ver llaveros" title="Llaveros" onclick="filterCategory('llaveros', this)">
-      <img src="img/llaveros/llavero.png" data-fallback="img/llaveros/default.png" alt="" onerror="categoryImageFailed(this)"/>
-      <span class="category-pill-label">Llaveros</span>
-    </button>
-    <button class="category-pill" type="button" aria-label="Ver bisutería" title="Bisutería" onclick="filterCategory('bisuteria', this)">
-      <img src="img/bisuteria/bisuteria.png" data-fallback="img/bisuteria/default.png" alt="" onerror="categoryImageFailed(this)"/>
-      <span class="category-pill-label">Bisutería</span>
-    </button>
-    <button class="category-pill" type="button" aria-label="Ver didácticos" title="Didácticos" onclick="filterCategory('didacticos', this)">
-      <img src="img/didacticos/didactico.png" data-fallback="img/didacticos/default.png" alt="" onerror="categoryImageFailed(this)"/>
-      <span class="category-pill-label">Didácticos</span>
-    </button>
+    <div class="category-item"><button class="category-pill fallback active" type="button" aria-label="Ver todos los productos" title="Todo" onclick="filterCategory('all', this)"><span class="category-pill-label">Todo</span></button><span class="category-name">Todo</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver llaveros" title="Llaveros" onclick="filterCategory('llaveros', this)">
+      <img src="img/llaveros/llavero.png" data-fallback="img/llaveros/default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Llaveros</span>
+    </button><span class="category-name">Llaveros</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver bisutería" title="Bisutería" onclick="filterCategory('bisuteria', this)">
+      <img src="img/bisuteria/bisuteria.png" data-fallback="img/bisuteria/default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Bisutería</span>
+    </button><span class="category-name">Bisutería</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver didácticos" title="Didácticos" onclick="filterCategory('didacticos', this)">
+      <img src="img/didacticos/didactico.png" data-fallback="img/didacticos/default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Didácticos</span>
+    </button><span class="category-name">Didácticos</span></div>
   </div>
   <button class="category-scroll-control next" type="button" aria-label="Ver más categorías" onclick="scrollCategoryBar(1)">›</button>
 </div>

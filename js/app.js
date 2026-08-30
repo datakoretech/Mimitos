@@ -560,11 +560,40 @@ function closeCart() {
    FILTRO
    ══════════════════════════════════════════ */
 function filterCategory(cat, btn) {
-  document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".category-pill").forEach(p => p.classList.remove("active"));
   btn.classList.add("active");
   document.querySelectorAll(".category-section").forEach(sec => {
     sec.style.display = (cat === "all" || sec.dataset.cat === cat) ? "" : "none";
   });
+}
+
+function categoryImageFailed(image) {
+  const fallback = image.dataset.fallback;
+  if (fallback && !image.dataset.usedFallback) {
+    image.dataset.usedFallback = "true";
+    image.src = fallback;
+    return;
+  }
+  image.closest(".category-pill")?.classList.add("fallback");
+  image.remove();
+}
+
+function updateCategoryScroller() {
+  const scroller = $("category-scroll");
+  const bar = $("category-bar");
+  if (!scroller || !bar) return;
+
+  const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+  const hasOverflow = maxScroll > 1;
+  bar.classList.toggle("has-overflow", hasOverflow);
+  bar.querySelector(".previous").disabled = !hasOverflow || scroller.scrollLeft <= 1;
+  bar.querySelector(".next").disabled = !hasOverflow || scroller.scrollLeft >= maxScroll - 1;
+}
+
+function scrollCategoryBar(direction) {
+  const scroller = $("category-scroll");
+  if (!scroller) return;
+  scroller.scrollBy({ left: direction * Math.max(180, scroller.clientWidth * .7), behavior:"smooth" });
 }
 
 /* ══════════════════════════════════════════
@@ -694,6 +723,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("modal-btn-add").addEventListener("click", modalAddToCart);
   $("modal-qty-minus").addEventListener("click", () => modalQtyChange(-1));
   $("modal-qty-plus").addEventListener("click", () => modalQtyChange(1));
+
+  const categoryScroller = $("category-scroll");
+  categoryScroller.addEventListener("scroll", updateCategoryScroller, { passive:true });
+  window.addEventListener("resize", updateCategoryScroller);
+  updateCategoryScroller();
 
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") { 

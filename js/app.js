@@ -116,7 +116,7 @@ function orderNumber() {
    ══════════════════════════════════════════ */
 const CAT_META = {
   llaveros:  { label:"Llaveros",  icon:"🔑" },
-  bisuteria: { label:"Bisutería", icon:"💎" },
+  coleccionables: { label:"Coleccionables", icon:"💎" },
   didacticos:{ label:"Didácticos",icon:"🎨" }
 };
 

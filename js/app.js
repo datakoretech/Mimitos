@@ -670,7 +670,7 @@ async function sendWhatsApp() {
     `*TOTAL: ${formatCOP(total)}*`,
     "",
     "Ver pedido:",
-    orderUrl
+    /*orderUrl*/
   );
 
   const text = lines.join("\n");

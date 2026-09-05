@@ -117,7 +117,10 @@ function orderNumber() {
 const CAT_META = {
   llaveros:  { label:"Llaveros",  icon:"🔑" },
   coleccionables: { label:"Coleccionables", icon:"💎" },
-  didacticos:{ label:"Didácticos",icon:"🎨" }
+  didacticos:{ label:"Didácticos",icon:"🎨" },
+  escolar:{ label:"Escolar",icon:"🎒" },
+  jugueteria:{ label:"Jugueteria",icon:"🚗" },
+  termos:{ label:"Termos",icon:"🥤" }
 };
 
 function fallbackSrc() {
@@ -669,7 +672,7 @@ async function sendWhatsApp() {
     "---------------------",
     `*TOTAL: ${formatCOP(total)}*`,
     "",
-    "Ver pedido:",
+    /*"Ver pedido:",*/
     /*orderUrl*/
   );
 

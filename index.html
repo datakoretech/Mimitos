@@ -66,6 +66,15 @@
     <div class="category-item"><button class="category-pill" type="button" aria-label="Ver didácticos" title="Didácticos" onclick="filterCategory('didacticos', this)">
       <img src="img/didacticos/0 default.png" data-fallback="img/didacticos/0 default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Didácticos</span>
     </button><span class="category-name">Didácticos</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver escolar" title="Escolar" onclick="filterCategory('escolar', this)">
+      <img src="img/escolar/0 default.png" data-fallback="img/escolar/0 default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Escolar</span>
+    </button><span class="category-name">Escolar</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver jugueteria" title="Jugueteria" onclick="filterCategory('jugueteria', this)">
+      <img src="img/jugueteria/0 default.png" data-fallback="img/jugueteria/0 default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Jugueteria</span>
+    </button><span class="category-name">Jugueteria</span></div>
+    <div class="category-item"><button class="category-pill" type="button" aria-label="Ver termos" title="Termos" onclick="filterCategory('termos', this)">
+      <img src="img/termos/0 default.png" data-fallback="img/termos/0 default.png" alt="" onerror="categoryImageFailed(this)"/><span class="category-pill-label">Termos</span>
+    </button><span class="category-name">Termos</span></div>
   </div>
   <button class="category-scroll-control next" type="button" aria-label="Ver más categorías" onclick="scrollCategoryBar(1)">›</button>
 </div>
@@ -98,6 +107,21 @@
   <div class="category-section" data-cat="didacticos">
     <h2 class="section-title" id="didacticos"><span class="icon">🎨</span> Didácticos</h2>
     <div class="grid" id="grid-didacticos"></div>
+  </div>
+
+  <div class="category-section" data-cat="escolar">
+    <h2 class="section-title" id="escolar"><span class="icon">🎒</span> Escolar</h2>
+    <div class="grid" id="grid-escolar"></div>
+  </div>
+
+    <div class="category-section" data-cat="jugueteria">
+    <h2 class="section-title" id="jugueteria"><span class="icon">🚗</span> Jugueteria</h2>
+    <div class="grid" id="grid-jugueteria"></div>
+  </div>
+
+    <div class="category-section" data-cat="termos">
+    <h2 class="section-title" id="termos"><span class="icon">🥤</span> Termos</h2>
+    <div class="grid" id="grid-termos"></div>
   </div>
 
 </main>
